@@ -1,0 +1,26 @@
+SELECT gender_age.mo_year,
+        AVG(gender_age.ac_age)
+    FROM (SELECT strftime("%Y",year_gender.rel_date) as mo_year,
+            year_gender.gender as ac_gender,
+            (
+            year_gender.rel_date-year_gender.dob
+            ) as ac_age
+        FROM (SELECT ca.movie_id as mo_id,
+                (SELECT m.release_date
+                FROM imdb_movie as m
+                WHERE m.movie_id=ca.movie_id
+                ) as rel_date,
+                ca.actor_id as ac_id,
+                (SELECT a.gender
+                FROM imdb_actor as a
+                WHERE a.actor_id=ca.actor_id
+                ) as gender,
+                (SELECT a.date_of_birth
+                FROM imdb_actor as a
+                WHERE a.actor_id=ca.actor_id
+                ) as dob
+            FROM imdb_cast ca
+            ) as year_gender
+            WHERE year_gender.gender='female'
+        ) as gender_age
+    GROUP BY gender_age.mo_year
