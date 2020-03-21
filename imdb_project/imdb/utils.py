@@ -291,19 +291,47 @@ def calculate_age(birth_date,today_date):
     return age 
 
 
+
+
+
 import random
 import time
 from datetime import datetime
+import requests
+import re
+from bs4 import BeautifulSoup
+
+def get_story_line_of_movie(url):
+    page=requests.get(url)
+    movie_soup=BeautifulSoup(page.content,'html.parser')
+    try:
+        movie_story_line=movie_soup.find('div',class_='inline canwrap').p.span.text
+        return movie_story_line
+    except:
+        return "No Description"
+
+def get_image_url_of_movie(url):
+    page=requests.get(url)
+    movie_soup=BeautifulSoup(page.content,'html.parser')
+    try:
+        image_url=movie_soup.img.attrs['src']
+        return(image_url)
+    except:
+        return '#'
+
 
 def populate_database(actors_list=[], 
                     movies_list=[], 
                     directors_list=[]):
     from .models import Actor,Director,Movie,Cast
+    from .utils import get_story_line_of_movie,get_image_url_of_movie
     import json
+    '''
     file=open("actors_100.json",'rb')
     actors_list=json.loads(file.read())
     file=open("directors_100.json",'rb')
     directors_list=json.loads(file.read())
+    '''
     file=open("movies_100.json",'rb')
     movies_list=json.loads(file.read())
     for actor in actors_list:
@@ -321,10 +349,14 @@ def populate_database(actors_list=[],
         Director.objects.create(
             name=director['name'],
             gender=director['gender'],
-            no_of_facebook_likes=director["no_of_facebook_likes"]
+            no_of_facebook_likes=director["no_of_facebook_likes"],
+
         )
     
     for movie in movies_list:
+        imdb_link=movie['imdb_link']
+        story_line=get_story_line_of_movie(imdb_link)
+        image_url=get_image_url_of_movie(imdb_link)
         movie_obj=Movie.objects.create(movie_id=movie['movie_id'],
                                         name=movie['name'],    
                                         box_office_collection_in_crores=movie['box_office_collection_in_crores'],
@@ -338,7 +370,9 @@ def populate_database(actors_list=[],
                                             'horror',
                                             'comedy',
                                             'science_fiction'
-                                        ])
+                                        ]),
+                                        movie_story_line=story_line,
+                                        movie_image_url=image_url
                                         )
         cast_list=movie['actors']
         for cast_item in cast_list:
@@ -355,7 +389,12 @@ def populate_database(actors_list=[],
                     remuneration=random.choice([1,2,3,4,5,7,10,12,14,18,20])
                     )
               
-
+def populate():
+    from .utils import get_story_line_of_movie,get_image_url_of_movie
+    story_line=get_story_line_of_movie("http://www.imdb.com/title/tt5289954/?ref_=fn_tt_tt_1")
+    image=get_image_url_f_movie("http://www.imdb.com/title/tt5289954/?ref_=fn_tt_tt_1")
+    print(story_line)
+    print(image)
 
 def str_time_prop(start, end, format, prop):
     """Get a time at a proportion of a range of two formatted times.

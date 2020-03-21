@@ -39,6 +39,8 @@ class Movie(models.Model):
     rating=models.FloatField()
     release_date=models.DateField()
     genre=models.CharField(max_length=20)
+    movie_story_line=models.TextField()
+    movie_image_url=models.URLField(max_length=200)
 
 class Cast(models.Model):
     import random

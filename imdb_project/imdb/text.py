@@ -1,3 +1,7 @@
+
+#<img src="{{ image.image.url }}" class="image-preview">
+
+
 '''
 SELECT gender_age.mo_year,
         AVG(gender_age.ac_age)
